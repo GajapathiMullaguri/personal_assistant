@@ -1,0 +1,31 @@
+# Core AI and ML libraries
+langchain
+langchain-groq
+langgraph
+langchain-community
+
+# LLM and embeddings
+groq
+sentence-transformers
+chromadb
+
+# Web interface
+streamlit
+
+# Data processing
+pydantic
+python-dotenv
+
+# Testing
+pytest
+pytest-asyncio
+
+# Development tools
+setuptools
+wheel
+
+# Additional dependencies
+numpy
+pandas
+requests
+typing-extensions
