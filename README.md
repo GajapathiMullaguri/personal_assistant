@@ -1,162 +1,281 @@
-# Agentic AI Personal Assistant
+# 🤖 AI Personal Assistant
 
-A sophisticated AI personal assistant built with Python, LangChain, and LangGraph, featuring long-term memory and a modern Streamlit interface.
+An intelligent, agentic AI personal assistant built with Python, LangChain, and LangGraph, featuring advanced memory management and conversation persistence.
 
-## 🏗️ Project Architecture
+## ✨ Features
 
-```
-personal_assistant/
-├── src/
-│   ├── __init__.py
-│   ├── core/
-│   │   ├── __init__.py
-│   │   ├── agent.py          # Main agent implementation
-│   │   ├── memory.py         # Long-term memory system
-│   │   └── config.py         # Configuration management
-│   ├── chains/
-│   │   ├── __init__.py
-│   │   └── chat_chain.py     # LangChain chat implementation
-│   ├── graphs/
-│   │   ├── __init__.py
-│   │   └── workflow.py       # LangGraph workflow definitions
-│   └── ui/
-│       ├── __init__.py
-│       └── streamlit_app.py  # Streamlit interface
-├── tests/
-│   ├── __init__.py
-│   ├── test_agent.py
-│   ├── test_memory.py
-│   └── test_chat_chain.py
-├── data/
-│   └── memory/               # Memory storage directory
-├── requirements.txt
-├── .env.example
-├── .gitignore
-├── main.py                   # Application entry point
-└── README.md
-```
+### Core Capabilities
+- **Intelligent Chat**: Natural language conversations using Groq LLM
+- **Long-term Memory**: Persistent memory system using ChromaDB vector database
+- **Agentic Workflow**: Multi-step processing using LangGraph orchestration
+- **Web Interface**: Beautiful Streamlit-based user interface
 
-## 🧠 LangGraph Architecture
+### 🧠 Enhanced Memory Features
+- **Automatic Conversation Persistence**: Every conversation is automatically saved to long-term memory
+- **Smart Context Retrieval**: Intelligent retrieval of relevant past conversations and information
+- **Token Optimization**: Context is automatically summarized and optimized to reduce token usage
+- **Importance Scoring**: Memories are automatically scored based on content and user indicators
+- **Memory Quality Metrics**: Track and analyze memory quality and conversation patterns
 
-Our assistant uses LangGraph to create a sophisticated workflow that orchestrates multiple AI agents and tools:
+### 🔄 Advanced Workflow
+- **Multi-step Processing**: Input processing → Memory retrieval → Context analysis → Response generation → Memory updates
+- **Context-aware Responses**: Responses are generated with full context from relevant memories
+- **Memory Quality Scoring**: Each workflow execution includes memory quality metrics
+- **Token-aware Context Management**: Intelligent context selection to optimize token usage
+
+### 💾 Memory Management
+- **Vector-based Search**: Semantic search using sentence transformers
+- **Importance-based Filtering**: Filter memories by importance score and relevance
+- **Automatic Summarization**: Long memories are automatically summarized for context
+- **Memory Export/Import**: Full memory system backup and restore capabilities
+- **Memory Insights**: Analytics on memory usage and conversation quality
+
+## 🏗️ Architecture
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   User Input    │───▶│  Input Router   │───▶│  Memory Agent   │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                │                        │
-                                ▼                        ▼
-                       ┌─────────────────┐    ┌─────────────────┐
-                       │  Chat Agent     │    │  Memory Store   │
-                       │  (Groq LLM)     │    │  (Vector DB)    │
-                       └─────────────────┘    └─────────────────┘
-                                │                        │
-                                ▼                        ▼
-                       ┌─────────────────┐    ┌─────────────────┐
-                       │  Response      │    │  Memory Update  │
-                       │  Generator     │    │  & Storage      │
-                       └─────────────────┘    └─────────────────┘
-                                │
-                                ▼
-                       ┌─────────────────┐
-                       │  User Output   │
-                       └─────────────────┘
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Streamlit UI  │    │   LangGraph      │    │   LangChain     │
+│                 │    │   Workflow       │    │   Chat Chains   │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+         │                       │                       │
+         │                       │                       │
+         ▼                       ▼                       ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Core Agent Layer                             │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐ │
+│  │   Memory    │  │   Context   │  │      LLM Interface      │ │
+│  │  Manager    │  │ Optimizer   │  │      (Groq)             │ │
+│  └─────────────┘  └─────────────┘  └─────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+         │                       │                       │
+         │                       │                       │
+         ▼                       ▼                       ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Data Layer                                  │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐ │
+│  │  ChromaDB   │  │  Sentence   │  │      Configuration      │ │
+│  │   Vector    │  │Transformers │  │      Management         │ │
+│  │  Database   │  │ Embeddings  │  │                         │ │
+│  └─────────────┘  └─────────────┘  └─────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-## 🚀 Features
+### LangGraph Workflow
 
-- **Intelligent Chat Interface**: Powered by Groq's fast LLM inference
-- **Long-term Memory**: Persistent memory using vector databases
-- **Agentic Workflows**: LangGraph-powered multi-agent orchestration
-- **Modern UI**: Clean Streamlit interface with real-time chat
-- **Modular Architecture**: Easy to extend and customize
+```
+User Input → Input Processor → Memory Retriever → Context Analyzer → Response Generator → Memory Updater → Output Formatter
+     │              │                │                │                │                │                │
+     │              ▼                ▼                ▼                ▼                ▼                ▼
+     │        Process Input    Retrieve Relevant   Analyze Context   Generate AI      Persist          Format
+     │        & Prepare        Memories with      & Calculate       Response with    Conversation      Final
+     │        Workflow         Importance         Quality Score     Full Context     to Memory        Output
+     └─────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
-## 🛠️ Technology Stack
+## 🚀 Quick Start
 
-- **Python 3.9+**
-- **LangChain**: LLM orchestration and chains
-- **LangGraph**: Multi-agent workflow management
-- **Groq**: Fast LLM inference
-- **Streamlit**: Web interface
-- **ChromaDB**: Vector database for memory
-- **Pydantic**: Data validation and settings
+### Prerequisites
+- Python 3.12+
+- Groq API key
+- Virtual environment (recommended)
 
-## 📦 Installation
+### Installation
 
-1. Clone the repository:
+1. **Clone the repository**
 ```bash
 git clone <repository-url>
 cd personal_assistant
 ```
 
-2. Create a virtual environment:
+2. **Create virtual environment**
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+# source .venv/bin/activate  # Linux/Mac
 ```
 
-3. Install dependencies:
+3. **Install dependencies**
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Set up environment variables:
+4. **Configure environment**
 ```bash
-cp .env.example .env
-# Edit .env with your Groq API key
-```
-
-## 🔑 Configuration
-
-Create a `.env` file with the following variables:
-```env
+# Create .env file with your Groq API key
 GROQ_API_KEY=your_groq_api_key_here
 MEMORY_PERSIST_DIR=./data/memory
 ```
 
-## 🚀 Usage
-
-### Running the Streamlit App
+5. **Run the application**
 ```bash
-streamlit run src/ui/streamlit_app.py
+# Streamlit web interface
+streamlit run streamlit_app_standalone.py
+
+# Command-line interface
+python main.py
 ```
 
-### Running from Command Line
-```bash
-python main.py
+## 🔧 Configuration
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `GROQ_API_KEY` | Your Groq API key | Required |
+| `MEMORY_PERSIST_DIR` | Memory storage directory | `./data/memory` |
+| `MEMORY_COLLECTION_NAME` | ChromaDB collection name | `assistant_memories` |
+| `MEMORY_EMBEDDING_MODEL` | Sentence transformer model | `all-MiniLM-L6-v2` |
+| `MEMORY_SIMILARITY_THRESHOLD` | Minimum similarity score | `0.3` |
+| `MEMORY_MAX_RESULTS` | Maximum search results | `10` |
+| `LLM_MODEL_NAME` | Groq model name | `llama3-8b-8192` |
+| `LLM_TEMPERATURE` | Response creativity | `0.7` |
+| `LLM_MAX_TOKENS` | Maximum response length | `4096` |
+
+### Memory Types
+
+- **`conversation`**: User-assistant exchanges (automatically persisted)
+- **`important_info`**: Explicitly marked important information
+- **`fact`**: General facts and knowledge
+- **`preference`**: User preferences and likes/dislikes
+- **`task`**: Tasks and action items
+- **`other`**: Miscellaneous information
+
+## 📊 Memory System
+
+### Automatic Conversation Persistence
+Every conversation is automatically saved to long-term memory with:
+- User input and assistant response
+- Automatic importance scoring
+- Metadata including timestamp and source
+- Conversation ID for tracking
+
+### Context Optimization
+The system automatically optimizes context retrieval by:
+- **Token Management**: Limits context to specified token budget
+- **Importance Filtering**: Prioritizes high-importance memories
+- **Smart Summarization**: Automatically summarizes long memories
+- **Relevance Scoring**: Combines semantic similarity with importance
+
+### Memory Quality Metrics
+Track memory system performance with:
+- **Importance Scores**: 0.0 (low) to 1.0 (high)
+- **Relevance Scores**: Semantic similarity to queries
+- **Combined Quality**: Weighted combination of importance and relevance
+- **Type Distribution**: Breakdown by memory type
+- **Conversation Quality**: Analysis of recent conversations
+
+## 🎯 Usage Examples
+
+### Basic Chat
+```python
+from src.core.agent import PersonalAssistant
+
+assistant = PersonalAssistant()
+response = await assistant.chat("Hello, how are you today?")
+print(response)
+```
+
+### Memory Management
+```python
+# Add memory with importance score
+memory_id = assistant.add_memory(
+    content="User prefers dark mode interfaces",
+    memory_type="preference",
+    importance_score=0.8
+)
+
+# Search memories with importance filtering
+results = assistant.search_memories(
+    query="interface preferences",
+    min_importance=0.6
+)
+
+# Get optimized context
+context = assistant.get_optimized_context(
+    query="user interface",
+    max_tokens=500
+)
+```
+
+### Workflow Processing
+```python
+from src.graphs.workflow import AssistantWorkflow
+
+workflow = AssistantWorkflow()
+result = await workflow.process_message("What did we discuss about AI yesterday?")
+
+print(f"Response: {result['response']}")
+print(f"Context tokens: {result['context_tokens']}")
+print(f"Memory quality: {result['memory_quality_score']}")
 ```
 
 ## 🧪 Testing
 
-Run the test suite:
+Run the test suite to verify functionality:
+
 ```bash
+# Test enhanced features
+python test_enhanced_features.py
+
+# Run unit tests
 pytest tests/
+
+# Test specific components
+pytest tests/test_memory.py -v
+pytest tests/test_agent.py -v
+pytest tests/test_workflow.py -v
 ```
 
-## 📁 Project Structure Details
+## 📁 Project Structure
 
-- **`src/core/`**: Core agent logic and memory management
-- **`src/chains/`**: LangChain implementations for chat and reasoning
-- **`src/graphs/`**: LangGraph workflow definitions and state management
-- **`src/ui/`**: Streamlit interface components
-- **`tests/`**: Comprehensive test suite
-- **`data/`**: Persistent storage for memory and user data
+```
+personal_assistant/
+├── src/
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── agent.py          # Enhanced agent with conversation persistence
+│   │   ├── memory.py         # Enhanced memory manager with optimization
+│   │   └── config.py         # Configuration management
+│   ├── chains/
+│   │   ├── __init__.py
+│   │   └── chat_chain.py     # LangChain chat implementations
+│   ├── graphs/
+│   │   ├── __init__.py
+│   │   └── workflow.py       # Enhanced LangGraph workflow
+│   └── ui/
+│       ├── __init__.py
+│       └── streamlit_app.py  # Enhanced Streamlit interface
+├── tests/                    # Test suite
+├── data/                     # Data storage
+├── requirements.txt          # Dependencies
+├── main.py                   # CLI entry point
+├── streamlit_app_standalone.py  # Enhanced standalone Streamlit app
+├── test_enhanced_features.py # Feature test script
+└── README.md                 # This file
+```
 
-## 🔄 Workflow
+## 🔄 Workflow Steps
 
-1. **Input Processing**: User input is received and routed to appropriate agents
-2. **Memory Retrieval**: Relevant context is retrieved from long-term memory
-3. **LLM Processing**: Groq LLM processes the input with context
-4. **Response Generation**: Intelligent response is generated and formatted
-5. **Memory Update**: New information is stored in long-term memory
-6. **Output Delivery**: Response is delivered to the user interface
+1. **Input Processor**: Analyzes user input and prepares workflow
+2. **Memory Retriever**: Gets optimized context from long-term memory
+3. **Context Analyzer**: Evaluates memory quality and relevance
+4. **Response Generator**: Creates AI response with full context
+5. **Memory Updater**: Persists conversation and important information
+6. **Output Formatter**: Formats final response for user
+
+## 📈 Performance Features
+
+- **Token Optimization**: Automatic context summarization to reduce token usage
+- **Memory Quality Scoring**: Continuous evaluation of memory relevance and importance
+- **Smart Caching**: Efficient memory retrieval with importance-based filtering
+- **Context Budgeting**: Intelligent allocation of token budget for context vs. response
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests
+4. Add tests for new functionality
 5. Submit a pull request
 
 ## 📄 License
@@ -165,7 +284,13 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🙏 Acknowledgments
 
-- LangChain team for the amazing framework
-- LangGraph for workflow orchestration
-- Groq for fast LLM inference
-- Streamlit for the beautiful UI framework
+- **LangChain**: LLM orchestration framework
+- **LangGraph**: Multi-agent workflow orchestration
+- **Groq**: Fast LLM inference
+- **ChromaDB**: Vector database for memory storage
+- **Streamlit**: Web interface framework
+- **Sentence Transformers**: Text embedding models
+
+---
+
+**Built with ❤️ using Python, LangChain, and LangGraph**

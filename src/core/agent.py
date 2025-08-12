@@ -1,5 +1,6 @@
 """
 Main personal assistant agent implementation.
+Enhanced with automatic conversation persistence and optimized context retrieval.
 """
 
 import asyncio
@@ -76,20 +77,13 @@ class PersonalAssistant:
         Returns:
             The assistant's response
         """
-        # Get relevant memories
-        relevant_memories = self.memory_manager.search_memory(
+        # Get optimized context from long-term memory
+        memory_context = self.memory_manager.get_optimized_context(
             query=user_input,
-            n_results=3,
-            filter_metadata={"user_id": user_id} if user_id else None
+            max_tokens=800,  # Reserve tokens for conversation and response
+            n_results=8,     # Get more memories for better context
+            include_summaries=True
         )
-        
-        # Format memory context
-        memory_context = ""
-        if relevant_memories:
-            memory_context = "\n\nRelevant context from memory:\n"
-            for content, score, metadata in relevant_memories:
-                if score > 0.7:  # Only include highly relevant memories
-                    memory_context += f"- {content}\n"
         
         # Get conversation history
         chat_history = self.conversation_memory.chat_memory.messages
@@ -128,7 +122,10 @@ class PersonalAssistant:
             self.conversation_memory.chat_memory.add_user_message(prompt_vars["input"])
             self.conversation_memory.chat_memory.add_ai_message(response_content)
             
-            # Store important information in long-term memory
+            # Automatically persist conversation to long-term memory
+            await self._persist_conversation(prompt_vars["input"], response_content)
+            
+            # Store important information in long-term memory (if not already done)
             await self._store_important_info(prompt_vars["input"], response_content)
             
             return response_content
@@ -158,6 +155,28 @@ class PersonalAssistant:
         except Exception as e:
             yield f"I apologize, but I encountered an error: {str(e)}"
     
+    async def _persist_conversation(self, user_input: str, response: str):
+        """Automatically persist conversation to long-term memory.
+        
+        Args:
+            user_input: The user's input
+            response: The assistant's response
+        """
+        try:
+            # Add conversation to long-term memory
+            self.memory_manager.add_conversation_memory(
+                user_input=user_input,
+                assistant_response=response,
+                metadata={
+                    "source": "automatic_persistence",
+                    "timestamp": datetime.now().isoformat(),
+                    "auto_saved": True
+                }
+            )
+        except Exception as e:
+            # Log error but don't fail the conversation
+            print(f"Warning: Failed to persist conversation: {e}")
+    
     async def _store_important_info(self, user_input: str, response: str):
         """Store important information from the conversation in long-term memory.
         
@@ -168,20 +187,23 @@ class PersonalAssistant:
         # Simple heuristic to determine if information is worth storing
         important_keywords = [
             "remember", "important", "save", "note", "preference", 
-            "like", "dislike", "always", "never", "favorite"
+            "like", "dislike", "always", "never", "favorite",
+            "critical", "essential", "key", "vital", "crucial"
         ]
         
         is_important = any(keyword in user_input.lower() for keyword in important_keywords)
         
         if is_important:
-            # Store the important information
+            # Store the important information with high importance score
             memory_content = f"User: {user_input}\nAssistant: {response}"
             self.memory_manager.add_memory(
                 content=memory_content,
                 memory_type="important_info",
+                importance_score=0.9,  # High importance for explicitly marked content
                 metadata={
                     "timestamp": datetime.now().isoformat(),
-                    "source": "conversation"
+                    "source": "conversation",
+                    "explicitly_important": True
                 }
             )
     
@@ -189,7 +211,8 @@ class PersonalAssistant:
         self, 
         content: str, 
         memory_type: str = "user_input",
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
+        importance_score: Optional[float] = None
     ) -> str:
         """Add information to long-term memory.
         
@@ -197,6 +220,7 @@ class PersonalAssistant:
             content: Content to remember
             memory_type: Type of memory
             metadata: Additional metadata
+            importance_score: Optional importance score (0.0 to 1.0)
             
         Returns:
             Memory ID
@@ -204,14 +228,16 @@ class PersonalAssistant:
         return self.memory_manager.add_memory(
             content=content,
             memory_type=memory_type,
-            metadata=metadata
+            metadata=metadata,
+            importance_score=importance_score
         )
     
     def search_memories(
         self, 
         query: str, 
         n_results: int = 5,
-        memory_type: Optional[str] = None
+        memory_type: Optional[str] = None,
+        min_importance: Optional[float] = None
     ) -> List[tuple]:
         """Search for relevant memories.
         
@@ -219,6 +245,7 @@ class PersonalAssistant:
             query: Search query
             n_results: Number of results to return
             memory_type: Filter by memory type
+            min_importance: Minimum importance score threshold
             
         Returns:
             List of (content, similarity_score, metadata) tuples
@@ -226,7 +253,33 @@ class PersonalAssistant:
         return self.memory_manager.search_memory(
             query=query,
             n_results=n_results,
-            memory_type=memory_type
+            memory_type=memory_type,
+            min_importance=min_importance
+        )
+    
+    def get_optimized_context(
+        self,
+        query: str,
+        max_tokens: int = 1000,
+        n_results: int = 10,
+        include_summaries: bool = True
+    ) -> str:
+        """Get optimized context for a query.
+        
+        Args:
+            query: Search query
+            max_tokens: Maximum tokens for context
+            n_results: Number of memories to consider
+            include_summaries: Whether to include memory summaries
+            
+        Returns:
+            Optimized context string
+        """
+        return self.memory_manager.get_optimized_context(
+            query=query,
+            max_tokens=max_tokens,
+            n_results=n_results,
+            include_summaries=include_summaries
         )
     
     def get_memory_stats(self) -> Dict[str, Any]:
@@ -275,3 +328,31 @@ class PersonalAssistant:
             summary += f"- Last user message: {user_messages[-1][:100]}...\n"
         
         return summary
+    
+    def get_memory_insights(self) -> Dict[str, Any]:
+        """Get insights about the memory system and conversation patterns.
+        
+        Returns:
+            Dictionary with memory insights
+        """
+        stats = self.get_memory_stats()
+        
+        # Get recent conversations
+        recent_conversations = self.memory_manager.search_memory(
+            query="conversation",
+            n_results=5,
+            memory_type="conversation",
+            min_importance=0.5
+        )
+        
+        insights = {
+            "memory_stats": stats,
+            "recent_conversations": len(recent_conversations),
+            "conversation_quality": {
+                "high_importance": len([m for m in recent_conversations if m[2].get('importance_score', 0) > 0.7]),
+                "medium_importance": len([m for m in recent_conversations if 0.4 <= m[2].get('importance_score', 0) <= 0.7]),
+                "low_importance": len([m for m in recent_conversations if m[2].get('importance_score', 0) < 0.4])
+            }
+        }
+        
+        return insights
